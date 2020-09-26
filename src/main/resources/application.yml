@@ -1,0 +1,19 @@
+spring:
+  cloud:
+    stream:
+      defaultBinder: kafka
+      kafka:
+        binder: #connection details for the messsge broker of choice
+          brokers: localhost:9092
+          autoCreateTopics: false
+      bindings:  #channels
+        input:
+          consumer:
+            resetOffsets: true
+            maxAttempts: 1
+          binder: kafka
+          group: "dummy"
+          destination: "trades" #topic or exchange
+
+
+bootstrap-servers: localhost:9092
