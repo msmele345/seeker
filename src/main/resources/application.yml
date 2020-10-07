@@ -12,7 +12,7 @@ spring:
             resetOffsets: true
             maxAttempts: 1
           binder: kafka
-          group: "dummy"
+          group: "seeker-trades"
           destination: "trades" #topic or exchange
 
 
