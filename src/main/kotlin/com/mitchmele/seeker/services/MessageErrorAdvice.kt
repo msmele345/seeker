@@ -13,7 +13,8 @@ import java.io.IOException
 @Service
 class MessageErrorAdvice(
         val messagingTemplate: MessagingTemplate,
-        val errorQueue: MessageChannel
+        val errorQueue: MessageChannel,
+        val auditLogService: AuditLogService
 ) : AbstractRequestHandlerAdvice() {
 
     override fun doInvoke(callback: ExecutionCallback, target: Any?, message: Message<*>): Any? {
@@ -21,19 +22,26 @@ class MessageErrorAdvice(
         return try {
             callback.execute()
         } catch (ex: MessageTransformationException) {
+
             ex.cause.let { transformationClause ->
-                when(transformationClause) {
+                when (transformationClause) {
                     is IOException -> {
-                        val errorMessage = MessageBuilder
-                                .withPayload(message.payload)
-                                .copyHeadersIfAbsent(message.headers)
-                                .setHeader("errorMessage", ex.localizedMessage)
-                                .build()
-                        messagingTemplate.send(errorQueue, errorMessage)
+                        auditLogService.save(message, ex)
+                        messagingTemplate.send(errorQueue, message.toErrorMessage(ex))
                     }
                 }
             }
+        } catch (ex: Exception) {
+            auditLogService.save(message, ex)
+            messagingTemplate.send(errorQueue, message.toErrorMessage(ex))
         }
 
     }
+
+    private fun <T> Message<T>.toErrorMessage(ex: Throwable): Message<T> = MessageBuilder
+            .withPayload(this.payload)
+            .copyHeadersIfAbsent(this.headers)
+            .setHeader("errorMessage", ex.localizedMessage)
+            .build()
+
 }

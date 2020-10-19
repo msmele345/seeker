@@ -1,18 +1,22 @@
 package com.mitchmele.seeker.services
 
-import com.mitchmele.seeker.database.AuditLogService
+import com.mitchmele.seeker.database.AuditLogRepository
+import com.mitchmele.seeker.model.AuditLog
 import org.springframework.messaging.Message
-import org.springframework.messaging.MessageHandler
 import org.springframework.stereotype.Service
 
 @Service
 class AuditLogService(
-        val auditLogService: AuditLogService
-): MessageHandler {
+        val auditLogRepository: AuditLogRepository
+) {
 
+    fun save(message: Message<*>?, ex: Throwable) {
 
-    override fun handleMessage(message: Message<*>) {
-        TODO("Not yet implemented")
+        val symbol = message?.let { it.headers["symbol"].toString() }
+
+        val auditLog = AuditLog(symbol = symbol, message = ex.localizedMessage, exception = ex)
+
+        auditLogRepository.save(auditLog)
     }
 
 }

@@ -9,10 +9,7 @@ import org.springframework.messaging.Message
 import org.springframework.messaging.support.MessageBuilder
 import java.io.IOException
 
-internal class MessageErrorAdviceTest : MessageErrorAdvice(
-        mock(),
-        mock()
-) {
+internal class MessageErrorAdviceTest : MessageErrorAdvice(mock(), mock(), mock()) {
 
     @Test
     internal fun `doInvoke - callback is called`() {
@@ -45,21 +42,42 @@ internal class MessageErrorAdviceTest : MessageErrorAdvice(
 
         val callBack: ExecutionCallback = mock()
 
+        val messageTransformationException = MessageTransformationException("cant transform", IOException("some io exception"))
         whenever(callBack.execute()) doAnswer {
-            throw  MessageTransformationException("cant transform", IOException("some io exception"))
+            throw  messageTransformationException
         }
 
-        val expectedErrorMessage = MessageBuilder
-                .withPayload(inputMessage.payload)
-                .setHeader("errorMessage", "some io exception")
-                .build()
 
-
-        val actual = doInvoke(callBack, null, inputMessage)
+        doInvoke(callBack, null, inputMessage)
 
         val captor = argumentCaptor<Message<*>>()
 
         verify(messagingTemplate).send(eq(errorQueue), captor.capture())
-        assertThat(captor.firstValue.headers["errorMessage"]).isEqualTo("cant transform; nested exception is java.io.IOException: some io exception")
+
+        val expectedErrorMsgHeader = "cant transform; nested exception is java.io.IOException: some io exception"
+        assertThat(captor.firstValue.headers["errorMessage"]).isEqualTo(expectedErrorMsgHeader)
+
+        verify(auditLogService).save(inputMessage, messageTransformationException)
+    }
+
+    @Test
+    internal fun `doInvoke - sends message to error queue if general exception is thrown`() {
+        val inputMessage = MessageBuilder.withPayload("payload").build()
+
+        val callBack: ExecutionCallback = mock()
+
+        val ex = RuntimeException("something bad")
+        whenever(callBack.execute()) doThrow ex
+
+        doInvoke(callBack, null, inputMessage)
+
+        val captor = argumentCaptor<Message<*>>()
+
+        verify(messagingTemplate).send(eq(errorQueue), captor.capture())
+
+        val expectedErrorMsgHeader = "something bad"
+        assertThat(captor.firstValue.headers["errorMessage"]).isEqualTo(expectedErrorMsgHeader)
+
+        verify(auditLogService).save(inputMessage, ex)
     }
 }
