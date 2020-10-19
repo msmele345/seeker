@@ -14,7 +14,7 @@ data class Trade(
         var id: Int = 0,
         val bidId: Int = 0,
         val askId: Int = 0,
-        val symbol: String?,
+        val symbol: String = "",
         val tradePrice: BigDecimal = BigDecimal(0),
         val timeStamp: Date = Date.from(Instant.now())
 )

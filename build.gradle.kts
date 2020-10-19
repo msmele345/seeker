@@ -21,7 +21,7 @@ extra["springCloudVersion"] = "Hoxton.SR8"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-integration")
-	implementation("org.springframework.boot:spring-boot-starter-security")
+//	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation ("org.springframework.cloud:spring-cloud-stream-binder-kafka")
@@ -45,7 +45,7 @@ dependencies {
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.springframework.cloud:spring-cloud-stream-test-support")
 	testImplementation("org.springframework.integration:spring-integration-test")
-	testImplementation("org.springframework.security:spring-security-test")
+//	testImplementation("org.springframework.security:spring-security-test")
 }
 
 dependencyManagement {
