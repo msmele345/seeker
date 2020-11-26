@@ -25,6 +25,9 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation ("org.springframework.cloud:spring-cloud-stream-binder-kafka")
+	implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
+
+	runtimeOnly ("mysql:mysql-connector-java")
 
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation ("org.springframework.boot:spring-boot-starter-data-mongodb")

@@ -16,7 +16,7 @@ import java.lang.RuntimeException
 import java.math.BigDecimal
 import java.util.*
 
-internal class TradeTransformerTest{
+class TradeTransformerTest{
 
     private val objectMapper = ObjectMapper()
     private val subject = TradeTransformer(objectMapper)
